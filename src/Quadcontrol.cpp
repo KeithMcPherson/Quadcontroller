@@ -10,7 +10,10 @@
 #include "SDL/SDL.h"
 #include "serialib.h"
 #include <iostream>
+#include <sstream>
+
 using namespace std;
+
 #if defined (_WIN32) || defined( _WIN64)
 #define         DEVICE_PORT             "COM1"                               // COM1 for windows
 #endif
@@ -20,12 +23,12 @@ using namespace std;
 #endif
 
 serialib Serial;
-//The joystick that will be used
 SDL_Joystick *stick = NULL;
 
 //prototype functions
 string readData();
 void sendData(string output);
+int joyToPWM(int value);
 
 int main() {
 	//Start SDL
@@ -39,13 +42,13 @@ int main() {
 
 	//Check if there's any joysticks
 	if( SDL_NumJoysticks() < 1 ) {
-		cout << "No Joystick Found";
+		cout << "No Joystick Found\n";
 		return false;
 	} //Open the joystick
 	stick = SDL_JoystickOpen( 0 );
 	//If there's a problem opening the joystick
 	if( stick == NULL ) {
-		cout << "Joystick couldn't be opened";
+		cout << "Joystick couldn't be opened\n";
 		return false;
 	}
 	cout << "Joystick Info:\n";
@@ -62,14 +65,27 @@ int main() {
 	//axis 6 volume control
 	//axis 7 mouse up/down
 	//axis 8 mouse left/right
+	const int ROLL_AXIS = 0;
+	const int PITCH_AXIS = 1;
+	const int YAW_AXIS = 5;
+	const int THROTTLE_AXIS = 2;
 
 	while (true) {
-		cout << "axis value: " << SDL_JoystickGetAxis(stick, 8) << "\n";
 		SDL_JoystickUpdate();
-		//sendData("s");
-		//cout << "read: " << readData() << "\n";
-		//sendData("71500;1500;1500;1500;");
-		usleep(1000000);
+		sendData("s");
+		cout << "read: " << readData() << "\n";
+
+		stringstream joyCommands;
+
+		joyCommands << 7;
+		joyCommands << SDL_JoystickGetAxis(stick, ROLL_AXIS) << ";";
+		joyCommands << SDL_JoystickGetAxis(stick, PITCH_AXIS) << ";";
+		joyCommands << SDL_JoystickGetAxis(stick, YAW_AXIS) << ";";
+		joyCommands << SDL_JoystickGetAxis(stick, THROTTLE_AXIS) << ";";
+		cout << joyCommands.str();
+		sendData(joyCommands.str());
+
+		usleep(33000);
 	}
 
 	Serial.Close();
@@ -105,4 +121,9 @@ string readData(){
 		return "";
 	}
 }
+
+int joyToPWM(int value){
+	return (value + 32768)/65.536+1000;
+}
+
 
