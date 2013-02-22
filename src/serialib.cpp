@@ -81,6 +81,12 @@
      // Open device
      fd = open(Device, O_RDWR | O_NOCTTY | O_NDELAY);                    // Open port
      if (fd == -1) return -2;                                            // If the device is not open, return -1
+
+     struct serial_struct serial;
+     ioctl(fd, TIOCGSERIAL, &serial);
+     serial.flags |= ASYNC_LOW_LATENCY; // (0x2000)
+     ioctl(fd, TIOCSSERIAL, &serial);
+
      fcntl(fd, F_SETFL, FNDELAY);                                        // Open the device in nonblocking mode
 
      // Set parameters

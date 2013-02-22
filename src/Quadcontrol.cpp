@@ -31,12 +31,16 @@ void sendData(string output);
 int joyToPWM(int value);
 
 int main() {
+	/*cout << "Setting serial port to low latency\n";
+	stringstream setserial;
+	setserial << "setserial " << DEVICE_PORT << " low_latency";
+	system(setserial.str().c_str());*/
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
 
-	if (Serial.Open(DEVICE_PORT,115200)!=1) {                                                           // If an error occured...
-		printf ("Error while opening port. Permission problem ?\n");        // ... display a message ...
-		return -1;                                                         // ... quit the application
+	if (Serial.Open(DEVICE_PORT,115200)!=1) { // If an error occured...
+		printf ("Error while opening port. Permission problem ?\n");
+		return -1;
 	}
 	printf ("Serial port opened successfully !\n\n");
 
@@ -70,22 +74,27 @@ int main() {
 	const int YAW_AXIS = 5;
 	const int THROTTLE_AXIS = 2;
 
+	cout << "Waiting 10s for reboot...\n";
+	usleep(10000000); //sleep so it has time to reboot
+	cout << "Done!\n";
+
 	while (true) {
+		//sendData("s;");
 		SDL_JoystickUpdate();
-		sendData("s");
-		cout << "read: " << readData() << "\n";
 
 		stringstream joyCommands;
 
 		joyCommands << 7;
-		joyCommands << SDL_JoystickGetAxis(stick, ROLL_AXIS) << ";";
-		joyCommands << SDL_JoystickGetAxis(stick, PITCH_AXIS) << ";";
-		joyCommands << SDL_JoystickGetAxis(stick, YAW_AXIS) << ";";
-		joyCommands << SDL_JoystickGetAxis(stick, THROTTLE_AXIS) << ";";
-		cout << joyCommands.str();
+		joyCommands << joyToPWM(SDL_JoystickGetAxis(stick, ROLL_AXIS)) << ";";
+		joyCommands << joyToPWM(SDL_JoystickGetAxis(stick, PITCH_AXIS)) << ";";
+		joyCommands << joyToPWM(SDL_JoystickGetAxis(stick, YAW_AXIS)) << ";";
+		joyCommands << joyToPWM(-SDL_JoystickGetAxis(stick, THROTTLE_AXIS)) << ";";
+		//cout << joyCommands.str() << "\n";
 		sendData(joyCommands.str());
 
-		usleep(33000);
+		usleep(50000);
+		readData();
+
 	}
 
 	Serial.Close();
@@ -102,24 +111,29 @@ void sendData(string output){
 	if (result!=1) {                                                           // If the writting operation failed ...
 		printf ("Error while writing data\n");                              // ... display a message ...
 	}
+	Serial.FlushReceiver();
 }
 
 string readData(){
 	char Buffer[256];
 
-	if (Serial.Peek() > 0) {
+	//if (Serial.Peek() > 0) {
 		// Read a string from the serial device
-		int result=Serial.ReadString(Buffer,'\n',128,500);	// Read a maximum of 128 characters with a timeout of 5 seconds
-															// The final character of the string must be a line feed ('\n')
-		/*if (result>0)                                     // If a string has been read from, print the string
-			printf ("String read from serial port : %s",Buffer);
-		else
-			printf ("TimeOut reached. No data received !\n");               // If not, print a message.
-		*/return Buffer;
+		int result=Serial.ReadString(Buffer,'\n',256);
+		if (result>0) {
+			cout << "read: " << Buffer;// If a string has been read from, print the string
+			return Buffer;
+		} else {
+			//printf ("TimeOut reached. No data received !\n");               // If not, print a message.
+			return "";
+		}
 
-	} else {
+
+		return Buffer;
+
+	/*} else {
 		return "";
-	}
+	}*/
 }
 
 int joyToPWM(int value){
