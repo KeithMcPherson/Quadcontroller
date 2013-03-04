@@ -1,3 +1,6 @@
-src/Quadcontrol.d: ../src/Quadcontrol.cpp ../src/serialib.h
+src/Quadcontrol.d: ../src/Quadcontrol.cpp ../src/serialib.h \
+ ../src/Quadcopter.h
 
 ../src/serialib.h:
+
+../src/Quadcopter.h:
