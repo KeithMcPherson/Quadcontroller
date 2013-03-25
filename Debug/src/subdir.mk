@@ -4,16 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Graphics.cpp \
 ../src/Quadcontrol.cpp \
 ../src/Quadcopter.cpp \
 ../src/serialib.cpp 
 
 OBJS += \
+./src/Graphics.o \
 ./src/Quadcontrol.o \
 ./src/Quadcopter.o \
 ./src/serialib.o 
 
 CPP_DEPS += \
+./src/Graphics.d \
 ./src/Quadcontrol.d \
 ./src/Quadcopter.d \
 ./src/serialib.d 

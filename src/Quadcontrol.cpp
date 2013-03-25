@@ -9,7 +9,7 @@
 
 #include "SDL/SDL.h"
 #include "serialib.h"
-#include "Quadcopter.h"
+#include "Graphics.h"
 
 #include <iostream>
 #include <sstream>
@@ -36,6 +36,10 @@ int joyToPWM(int value);
 vector<string> explode( const string &delimiter, const string &explodeme);
 void sendJoyCommands();
 
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_BPP = 32;
+Graphics* gfx;
 	//axis 0 roll
 	//axis 1 pitch
 	//axis 2 throttle
@@ -47,15 +51,17 @@ void sendJoyCommands();
 	//axis 8 mouse left/right
 	const int ROLL_AXIS = 0;
 	const int PITCH_AXIS = 1;
-	//const int YAW_AXIS = 5;
-	//const int THROTTLE_AXIS = 2;
-	const int THROTTLE_AXIS = 3;
-	const int YAW_AXIS = 2;
+	const int YAW_AXIS = 5;
+	const int THROTTLE_AXIS = 2;
+	//const int THROTTLE_AXIS = 3;
+	//const int YAW_AXIS = 2;
 
 int main() {
 
 	//Start SDL
 	SDL_Init( SDL_INIT_EVERYTHING );
+	gfx = new Graphics (SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE ));
+
 
 	if (Serial.Open(DEVICE_PORT,115200)!=1) { // If an error occured...
 		printf ("Error while opening port. Permission problem ?\n");
@@ -94,6 +100,7 @@ int main() {
 
 		usleep(50000);
 		quadcopter->parseTelemetry(explode(",", readData()));
+		gfx->renderMotors(quadcopter);
 
 	}
 

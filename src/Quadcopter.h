@@ -17,4 +17,6 @@ class Quadcopter
 	public:
 		Quadcopter();
 		void parseTelemetry(vector<string> data);
+		int getMotorPower(int motor);
+
 };

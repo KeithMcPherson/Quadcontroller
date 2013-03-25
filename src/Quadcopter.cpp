@@ -19,4 +19,23 @@ void Quadcopter::parseTelemetry(vector<string> data){
 	this->motor3 = atoi(data.at(16).c_str());
 	this->motor4 = atoi(data.at(17).c_str());
 
+	/*cout << "Motor 1: " << this->motor1 << endl;
+	cout << "Motor 2: " << this->motor2 << endl;
+	cout << "Motor 3: " << this->motor3 << endl;
+	cout << "Motor 4: " << this->motor4 << endl;*/
+
+}
+
+int Quadcopter::getMotorPower(int motor){
+	if (motor == 1) {
+		return this->motor1;
+	} else if (motor == 2) {
+		return this->motor2;
+	} else if (motor == 3) {
+		return this->motor3;
+	} else if (motor == 4) {
+		return this->motor4;
+	} else {
+		return 0;
+	}
 }
